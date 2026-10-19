@@ -1,0 +1,616 @@
+<title>Stochastic Agents</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --fg: #1C1C1A;
+    --fg-secondary: #5A5A55;
+    --surface: #F0EFEB;
+    --surface-alt: #E8E6E0;
+    --border: #D4D2CC;
+    --accent: #2D6A5E;
+    --accent-light: #E8F2EF;
+    --accent-dim: #4A8B7E;
+    --notation-bg: #F5F4F0;
+    --notation-border: #C8C5BC;
+    --theorem-bg: #F0F6F4;
+    --theorem-border: #2D6A5E;
+    --remark-bg: #FDF8F0;
+    --remark-border: #B8915A;
+    --code-bg: #2A2A28;
+    --code-fg: #E8E6E0;
+    --code-accent: #7ECDB8;
+    --code-comment: #8A8A85;
+    --code-type: #D4A76A;
+    --code-string: #C4A0D0;
+    --font-display: 'Crimson Pro', 'Georgia', serif;
+    --font-body: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Menlo', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #191917; --fg: #E4E3DF; --fg-secondary: #9A9A95;
+      --surface: #242422; --surface-alt: #2E2E2B; --border: #3E3E3A;
+      --accent: #5EBAA8; --accent-light: #1E2E2A; --accent-dim: #7ECDB8;
+      --notation-bg: #222220; --notation-border: #3E3E3A;
+      --theorem-bg: #1A2826; --theorem-border: #5EBAA8;
+      --remark-bg: #262218; --remark-border: #C4A060;
+      --code-bg: #141413; --code-fg: #E8E6E0;
+      --code-accent: #7ECDB8; --code-comment: #6A6A65;
+      --code-type: #D4A76A; --code-string: #C4A0D0;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #191917; --fg: #E4E3DF; --fg-secondary: #9A9A95;
+    --surface: #242422; --surface-alt: #2E2E2B; --border: #3E3E3A;
+    --accent: #5EBAA8; --accent-light: #1E2E2A; --accent-dim: #7ECDB8;
+    --notation-bg: #222220; --notation-border: #3E3E3A;
+    --theorem-bg: #1A2826; --theorem-border: #5EBAA8;
+    --remark-bg: #262218; --remark-border: #C4A060;
+    --code-bg: #141413; --code-fg: #E8E6E0;
+    --code-accent: #7ECDB8; --code-comment: #6A6A65;
+    --code-type: #D4A76A; --code-string: #C4A0D0;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--font-body); font-size: 15px; line-height: 1.7;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+  .page { max-width: 740px; margin: 0 auto; padding-block: 2.5rem 4rem; }
+
+  .header { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 2px solid var(--accent); }
+  .header-eyebrow {
+    font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem;
+  }
+  .header h1 {
+    font-family: var(--font-display); font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 600; line-height: 1.2; margin: 0 0 0.75rem; text-wrap: balance;
+  }
+  .header .subtitle {
+    font-family: var(--font-display); font-size: 1.15rem; font-style: italic;
+    color: var(--fg-secondary); line-height: 1.5;
+  }
+  .header .meta { margin-top: 1rem; font-size: 0.8rem; color: var(--fg-secondary); font-family: var(--font-mono); }
+
+  h2 {
+    font-family: var(--font-display); font-size: 1.5rem; font-weight: 600;
+    line-height: 1.3; margin: 2.5rem 0 1rem; text-wrap: balance;
+  }
+  h3 { font-family: var(--font-body); font-size: 1rem; font-weight: 600; margin: 1.75rem 0 0.5rem; }
+  h4 {
+    font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent);
+    margin: 1.5rem 0 0.5rem;
+  }
+  p { margin: 0 0 1rem; }
+
+  .theorem, .remark, .definition {
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+    border-left: 3px solid var(--theorem-border);
+    background: var(--theorem-bg); border-radius: 0 4px 4px 0;
+  }
+  .theorem .label, .remark .label, .definition .label {
+    font-family: var(--font-body); font-weight: 600; font-size: 0.8rem;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem;
+  }
+  .theorem p:last-child, .remark p:last-child, .definition p:last-child { margin-bottom: 0; }
+  .remark { border-left-color: var(--remark-border); background: var(--remark-bg); }
+  .remark .label { color: var(--remark-border); }
+  .definition { border-left-color: var(--border); background: var(--surface); }
+  .definition .label { color: var(--fg-secondary); }
+
+  .notation {
+    background: var(--notation-bg); border: 1px solid var(--notation-border);
+    padding: 1.25rem 1.5rem; margin: 1.25rem 0; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.8;
+    overflow-x: auto; white-space: pre;
+  }
+  .notation .cm { color: var(--fg-secondary); font-style: italic; }
+
+  .code-block {
+    background: var(--code-bg); color: var(--code-fg);
+    padding: 1.25rem 1.5rem; margin: 1.25rem 0; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7;
+    overflow-x: auto; white-space: pre;
+  }
+  .code-block .kw { color: var(--code-accent); }
+  .code-block .cm { color: var(--code-comment); }
+  .code-block .op { color: var(--code-type); }
+  .code-block .ty { color: var(--code-type); }
+  .code-block .str { color: var(--code-string); }
+
+  .map-table {
+    width: 100%; border-collapse: collapse; margin: 1.25rem 0;
+    font-size: 0.9rem; font-variant-numeric: tabular-nums;
+  }
+  .map-table th {
+    font-family: var(--font-body); font-weight: 600; font-size: 0.75rem;
+    letter-spacing: 0.04em; text-transform: uppercase; text-align: left;
+    padding: 0.5rem 1rem; color: var(--accent); border-bottom: 2px solid var(--border);
+  }
+  .map-table td {
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .map-table tr:last-child td { border-bottom: none; }
+  .map-table .sym {
+    font-family: var(--font-mono); font-weight: 500; white-space: nowrap; color: var(--accent-dim);
+  }
+
+  code {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--surface); padding: 0.15em 0.4em; border-radius: 3px;
+  }
+  ul, ol { padding-left: 1.5rem; margin: 0 0 1rem; }
+  li { margin-bottom: 0.35rem; }
+  li::marker { color: var(--accent); }
+  .sep { height: 1px; background: var(--border); margin: 2.5rem 0; border: none; }
+  strong { font-weight: 600; }
+  em { font-family: var(--font-display); font-style: italic; }
+
+  .footer {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    font-size: 0.8rem; color: var(--fg-secondary); font-family: var(--font-mono);
+  }
+
+  @media (max-width: 500px) {
+    .notation { font-size: 0.78rem; padding: 1rem; }
+    .code-block { font-size: 0.78rem; padding: 1rem; }
+    .map-table { font-size: 0.82rem; }
+    .map-table td, .map-table th { padding: 0.5rem 0.6rem; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="header">
+    <div class="header-eyebrow">Stave Notation § Stochastic Semantics</div>
+    <h1>Temperature, Sampling, and the Measure Theory of LLM Agents</h1>
+    <div class="subtitle">How prompt temperature, top-p, top-k, and other sampling parameters enter the cartesian double category as morphisms on probability measures — and what the notation says about controlling them</div>
+    <div class="meta">V. Nechyporuk-Zloy · 19 October 2026</div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>1. The Problem: Every Agent Call Is a Random Variable</h2>
+
+  <p>A deterministic tool — <code>regionprops</code>, a Gaussian blur, a file reader — is a function <code>f: A → B</code>. Given the same input, it returns the same output. In the cartesian double category <strong>Dbl(Img)</strong>, it is a horizontal morphism with a trivial probability structure: a Dirac delta concentrated on one point.</p>
+
+  <p>An LLM agent is different. Given the same prompt, the same image, the same parameters, it can return different outputs on different runs. The σ-agent might choose Cellpose on one run and StarDist on another. The ε-agent might pass a segmentation on one run and flag it for re-examination on the next. This is not a bug — it is the fundamental nature of autoregressive token generation.</p>
+
+  <p>The question is: where does this randomness live in the notation, and how do the sampling parameters (temperature, top-p, top-k, frequency penalty, presence penalty) control it?</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>2. Autoregressive Generation as a Markov Chain</h2>
+
+  <p>An LLM generates text token by token. At each step, it computes a probability distribution over the vocabulary <code>V</code> (typically 32k–128k tokens), conditioned on all previous tokens. This is a Markov chain on the token space:</p>
+
+  <div class="code-block"><span class="cm">-- Autoregressive generation</span>
+<span class="cm">-- At step t, the model computes:</span>
+p(xₜ | x₁, x₂, ..., xₜ₋₁) <span class="op">=</span> softmax(logits(x₁..xₜ₋₁) / τ)
+
+<span class="cm">-- The full output probability is the product:</span>
+P(x₁..xₙ) <span class="op">=</span> ∏ₜ p(xₜ | x₁..xₜ₋₁)
+
+<span class="cm">-- This is a Markov chain on V* (sequences over vocabulary V)</span>
+<span class="cm">-- with transition kernel K: V* × V → [0,1]</span></div>
+
+  <p>The key insight: the <strong>logits</strong> — the raw scores before softmax — are the model's deterministic output. Everything stochastic happens in the sampling step that converts logits to a chosen token. The sampling parameters control this conversion.</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>3. The Sampling Parameters</h2>
+
+  <h3>Temperature (τ)</h3>
+
+  <p>Temperature scales the logits before softmax. It is a single real number τ ∈ (0, ∞) that controls the entropy of the output distribution.</p>
+
+  <div class="code-block">p(xₜ) <span class="op">=</span> softmax(logits / τ)
+
+τ → 0⁺  : distribution collapses to argmax (deterministic, greedy)
+τ = 1   : model's native distribution (calibrated probabilities)
+τ → ∞   : uniform distribution over vocabulary (maximum entropy)</div>
+
+  <p>Categorically, temperature is a morphism on the space of probability measures. Let <code>Δ(V)</code> be the probability simplex over the vocabulary. Temperature defines a family of endomorphisms:</p>
+
+  <div class="definition">
+    <div class="label">Definition: Temperature as endomorphism</div>
+    <p>For each τ > 0, the temperature map <code>T_τ: Δ(V) → Δ(V)</code> sends a distribution <code>p</code> to the distribution <code>T_τ(p)</code> defined by <code>T_τ(p)(x) ∝ p(x)^(1/τ)</code>. This is the power-mean reparametrisation of softmax. The family {T_τ} forms a one-parameter semigroup under composition: <code>T_τ₁ ∘ T_τ₂ = T_{τ₁·τ₂}</code>.</p>
+  </div>
+
+  <p>In the stave, temperature is a <code>×</code> parameter on the agent box — independent of the data, constant across runs:</p>
+
+  <div class="notation">σ: SegmentAgent(<span class="cm">× Temperature=0.2</span>, × Model=cyto3)
+<span class="cm">-- Low temperature: agent almost always picks the same segmentation</span>
+<span class="cm">-- High temperature: agent explores diverse segmentation strategies</span></div>
+
+  <h3>Top-p (nucleus sampling)</h3>
+
+  <p>Top-p truncates the distribution to the smallest set of tokens whose cumulative probability exceeds a threshold p ∈ (0, 1], then renormalises. This is a <strong>truncation morphism</strong> on probability measures:</p>
+
+  <div class="code-block"><span class="cm">-- Sort tokens by probability descending</span>
+<span class="cm">-- Find smallest k such that Σᵢ₌₁ᵏ p(xᵢ) ≥ p_threshold</span>
+<span class="cm">-- Zero out all tokens beyond position k</span>
+<span class="cm">-- Renormalise</span>
+
+Nucleus_p : Δ(V) → Δ(V)
+Nucleus_p(dist) <span class="op">=</span> truncate(sort(dist), cumsum ≥ p) / Z</div>
+
+  <p>Top-p is <strong>not</strong> a continuous map on <code>Δ(V)</code> — small changes in the input distribution can cause the cutoff to jump, including or excluding a token at the boundary. This discontinuity has practical consequences: near the boundary, the agent's behaviour is sensitive to small prompt changes. The Lipschitz constant of <code>Nucleus_p</code> is unbounded near the cutoff.</p>
+
+  <h3>Top-k</h3>
+
+  <p>Top-k is simpler: keep the k highest-probability tokens, zero the rest, renormalise. This is a projection onto a subspace of <code>Δ(V)</code>:</p>
+
+  <div class="definition">
+    <div class="label">Definition: Top-k as projection</div>
+    <p><code>TopK_k: Δ(V) → Δ_k(V)</code> projects from the full simplex to the k-face (the sub-simplex spanned by the k highest-probability vertices). This is an idempotent: <code>TopK_k ∘ TopK_k = TopK_k</code>. It is a retraction, with the inclusion <code>ι: Δ_k(V) → Δ(V)</code> as its section.</p>
+  </div>
+
+  <h3>Frequency and presence penalties</h3>
+
+  <p>These modify the logits based on what has already been generated. They are <strong>stateful</strong> — they depend on the generation history, not just the current token. In the Kleisli category, they are morphisms in the state monad:</p>
+
+  <div class="code-block"><span class="cm">-- Frequency penalty: subtract α·count(token) from logits</span>
+<span class="cm">-- Presence penalty: subtract β·1[token appeared] from logits</span>
+
+FreqPenalty_α <span class="op">::</span> <span class="ty">State</span> <span class="ty">TokenCounts</span> (<span class="ty">Logits</span> <span class="op">-></span> <span class="ty">Logits</span>)
+PresencePenalty_β <span class="op">::</span> <span class="ty">State</span> <span class="ty">TokenSet</span> (<span class="ty">Logits</span> <span class="op">-></span> <span class="ty">Logits</span>)
+
+<span class="cm">-- These are endomorphisms on the logit space that carry state</span>
+<span class="cm">-- State accumulates through the Markov chain</span></div>
+
+  <p>In the stave, frequency and presence penalties are also <code>×</code> parameters — but unlike temperature and top-p, they introduce a <strong>temporal dependency</strong> within the token generation. The agent's output distribution at token <em>t</em> depends on tokens 1 through <em>t-1</em>, not just through the autoregressive conditioning (which the model handles natively) but through the penalty's explicit modification of the logits. This breaks the "pure" Markov property — the penalty is an external intervention on the chain.</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>4. The Sampling Stack as a Morphism Chain</h2>
+
+  <p>The full sampling pipeline — from raw logits to a chosen token — is itself a stave. Each sampling parameter is a morphism in a sequential composition:</p>
+
+  <div class="notation"><span class="cm">-- The sampling sub-stave (internal to every agent box)</span>
+Logits ── ℝ|V| ──
+     ↓
+  ρ: FrequencyPenalty(× α=0.5)       <span class="cm">← modify logits by history</span>
+     ↓
+  ρ: PresencePenalty(× β=0.3)        <span class="cm">← modify logits by token set</span>
+     ↓
+  ρ: TemperatureScale(× τ=0.2)       <span class="cm">← scale logits</span>
+     ↓
+  σ: TopK(× k=40)                    <span class="cm">← truncate to k tokens</span>
+     ↓
+  σ: NucleusSample(× p=0.95)         <span class="cm">← truncate to nucleus</span>
+     ↓
+  ι: SampleToken                     <span class="cm">← draw from distribution</span>
+     ↓
+Token ── V ──</div>
+
+  <p>Every agent box in the outer stave contains this inner sampling stave. The morphism types follow the same logic as image analysis: ρ transforms representations (logit modification), σ classifies and selects (truncation), ι acquires from a source (sampling from the distribution). The notation is self-hosting even inside the agent.</p>
+
+  <div class="remark">
+    <div class="label">Order matters</div>
+    <p>Temperature before top-k is not the same as top-k before temperature. <code>T_τ ∘ TopK_k ≠ TopK_k ∘ T_τ</code> in general: temperature can change which tokens are in the top k. The stave's sequential composition (<code>;</code>) makes the order explicit. Most API implementations apply penalties first, then temperature, then top-k, then top-p, then sample — and the stave above shows that order. A different order is a different pipeline and may give different results.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>5. Temperature in the Enriched Category</h2>
+
+  <p>In the enriched category <strong>Agent</strong><sub>V</sub> (§6 of the agentic image analysis document), the hom-objects are probability distributions over possible outputs. Temperature directly controls the <strong>shape</strong> of these hom-objects.</p>
+
+  <div style="overflow-x:auto">
+  <table class="map-table">
+    <thead>
+      <tr>
+        <th>Temperature</th>
+        <th>Hom-object shape</th>
+        <th>Agent behaviour</th>
+        <th>Image analysis effect</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sym">τ → 0</td>
+        <td>Dirac delta</td>
+        <td>Deterministic: always picks argmax</td>
+        <td>Always chooses the same model, same parameters. Reproducible but possibly stuck in a local optimum.</td>
+      </tr>
+      <tr>
+        <td class="sym">τ = 0.1–0.3</td>
+        <td>Narrow peak</td>
+        <td>Near-deterministic with occasional variation</td>
+        <td>Usually picks the best segmentation model but sometimes tries an alternative. Good for production pipelines where consistency matters.</td>
+      </tr>
+      <tr>
+        <td class="sym">τ = 0.5–0.8</td>
+        <td>Moderate spread</td>
+        <td>Balanced exploration/exploitation</td>
+        <td>Explores different approaches. Good for the meta-agent designing pipelines — considers unusual composite combinations.</td>
+      </tr>
+      <tr>
+        <td class="sym">τ = 1.0</td>
+        <td>Calibrated distribution</td>
+        <td>Model's native uncertainty</td>
+        <td>The model's own assessment of how likely each option is. Useful for uncertainty quantification — the distribution IS the uncertainty.</td>
+      </tr>
+      <tr>
+        <td class="sym">τ > 1.0</td>
+        <td>Flattened, high entropy</td>
+        <td>Near-random exploration</td>
+        <td>Tries everything, including bad ideas. Useful only for stress-testing or diversity sampling — never for production.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The enriched composition law says that composing two agents convolves their hom-object distributions. Temperature compounds: a pipeline of three agents at τ = 0.5 has more combined uncertainty than any single agent, because the convolution spreads the distribution at each step. This is why the Lipschitz budget matters — even moderate per-agent uncertainty can compound into high end-to-end uncertainty.</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>6. The Kleisli Arrow Formulation</h2>
+
+  <p>Recall that each agent is a Kleisli arrow <code>a → m b</code> in the agent monad <code>m = WriterT Provenance (StateT Context (ExceptT Failure (ReaderT Config IO)))</code>. The sampling parameters live in the <code>ReaderT Config</code> layer — they are read-only configuration, accessed via <code>×</code>.</p>
+
+  <div class="code-block"><span class="cm">-- Config carries sampling parameters</span>
+<span class="kw">data</span> <span class="ty">SamplingConfig</span> <span class="op">=</span> <span class="ty">SamplingConfig</span>
+  { temperature     <span class="op">::</span> <span class="ty">Double</span>     <span class="cm">-- τ ∈ (0, ∞)</span>
+  , topP            <span class="op">::</span> <span class="ty">Double</span>     <span class="cm">-- p ∈ (0, 1]</span>
+  , topK            <span class="op">::</span> <span class="ty">Int</span>        <span class="cm">-- k ∈ {1, ..., |V|}</span>
+  , frequencyPenalty <span class="op">::</span> <span class="ty">Double</span>    <span class="cm">-- α ≥ 0</span>
+  , presencePenalty  <span class="op">::</span> <span class="ty">Double</span>    <span class="cm">-- β ≥ 0</span>
+  , seed            <span class="op">::</span> <span class="ty">Maybe</span> <span class="ty">Int</span>  <span class="cm">-- for reproducibility</span>
+  }
+
+<span class="cm">-- Agent reads config via ×</span>
+σAgent <span class="op">::</span> <span class="ty">Agent</span> <span class="ty">RawImage</span> <span class="ty">LabelImage</span>
+σAgent img <span class="op">=</span> <span class="kw">do</span>
+  cfg <span class="op"><-</span> asks samplingConfig      <span class="cm">-- read × parameters</span>
+  <span class="kw">let</span> sampler <span class="op">=</span> mkSampler cfg     <span class="cm">-- build sampling chain</span>
+  model <span class="op"><-</span> sampler (chooseModel img)  <span class="cm">-- stochastic choice</span>
+  params <span class="op"><-</span> sampler (tuneParams img model)
+  runSegmentation model params img</div>
+
+  <p>The <code>seed</code> parameter is categorically interesting. When set, it turns the Kleisli arrow back into an ordinary morphism — the randomness is fixed, so <code>a → m b</code> degenerates to <code>a → b</code>. This is the retraction from the Kleisli category back to the base category. In the stave, setting a seed is equivalent to collapsing the enriched hom-object back to a Dirac delta. The pipeline becomes reproducible.</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>7. The Prompt as Left Adjoint</h2>
+
+  <p>The prompt — the system message, user message, and conversation history — is not a sampling parameter. It is categorically different: the prompt determines <strong>which</strong> distribution the model computes, while sampling parameters determine <strong>how</strong> we draw from that distribution.</p>
+
+  <div class="definition">
+    <div class="label">Definition: Prompt as left adjoint</div>
+    <p>Let <strong>Prompt</strong> be the category of prompt texts and <strong>Dist</strong> be the category of distributions over output texts. The model defines a functor <code>M: Prompt → Dist</code> that maps each prompt to its output distribution. The sampling parameters define a functor <code>S: Dist → Dist</code> (endomorphism on distributions). The full agent call is <code>S ∘ M: Prompt → Dist</code>.</p>
+    <p>The prompt is a left adjoint in the sense that it is the <em>most efficient</em> way to change the output distribution: changing the prompt changes the logits everywhere simultaneously, while sampling parameters only reshape the existing distribution without adding information.</p>
+  </div>
+
+  <p>In the stave, the prompt is the <strong>content of the box</strong> — the morphism type (σ, μ, ε, ...) and its semantic role — while temperature and top-p are <code>×</code> parameters on the box. The distinction is visible: the box IS the prompt (what to do), the × IS the sampling configuration (how uncertain to be about it).</p>
+
+  <div class="notation"><span class="cm">-- The box content IS the prompt</span>
+<span class="cm">-- The × parameters ARE the sampling config</span>
+
+σ: <span class="cm">"Segment this microscopy image.         ← prompt (determines logits)</span>
+   <span class="cm"> Use Cellpose or StarDist as appropriate.</span>
+   <span class="cm"> Evaluate boundary quality."</span>
+  (× Temperature=0.2,                     <span class="cm">← sampling (shapes distribution)</span>
+   × TopP=0.95,
+   × Seed=42)</div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>8. Temperature and the Self-Correction Loop</h2>
+
+  <p>Temperature interacts with the self-correction loop ({1..T}² pattern) in a precise way. The contraction theorem (§14 of the agentic document) says that convergence requires the correction map to be a contraction — λ < 1. Temperature affects the contraction rate:</p>
+
+  <ul>
+    <li><strong>Too low (τ → 0):</strong> the agent always makes the same choice. If the first choice is wrong, it cannot escape — the correction map is the identity, λ = 1. No convergence to a better solution.</li>
+    <li><strong>Too high (τ > 1):</strong> the agent makes random choices. The correction map has high variance, possibly λ > 1. The segmentation quality oscillates rather than converging.</li>
+    <li><strong>Optimal range (τ ≈ 0.1–0.5):</strong> the agent mostly exploits its best guess but occasionally explores alternatives. The correction map is a contraction with λ < 1. Quality improves monotonically toward the fixed point.</li>
+  </ul>
+
+  <div class="theorem">
+    <div class="label">Proposition: Adaptive temperature schedule</div>
+    <p>The optimal strategy for the self-correction loop is an <strong>annealing schedule</strong>: start with higher temperature (τ ≈ 0.5–0.8) to explore the space of possible segmentations, then decrease temperature as quality improves (τ ≈ 0.1 at convergence). This is simulated annealing on the segmentation metric space. The cooling schedule ensures exploration early and exploitation late, with the contraction rate λ(τ) decreasing monotonically.</p>
+  </div>
+
+  <p>In the stave, the annealing schedule means temperature is not a fixed <code>×</code> parameter — it depends on the iteration index from <code>{1..T}²</code>. It becomes an <code>&amp;</code> input: temperature shares the iteration index with the quality score.</p>
+
+  <div class="notation"><span class="cm">-- Annealing in the self-correction loop</span>
+(Turns ── Params ──) &amp; (Turns ── {1..T}² QualityΔ ──) &amp; (Turns ── τ(t) ──)
+
+<span class="cm">-- τ(t) = τ_max · exp(-αt)  or  τ(t) = τ_max / (1 + αt)</span>
+<span class="cm">-- Turn 1: τ = 0.7 (explore)</span>
+<span class="cm">-- Turn 2: τ = 0.4 (narrow)</span>
+<span class="cm">-- Turn 3: τ = 0.2 (exploit)</span>
+<span class="cm">-- Turn 4: τ = 0.1 (converge)</span></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>9. Different Agents, Different Temperatures</h2>
+
+  <p>Not every agent should run at the same temperature. The optimal τ depends on the morphism type and its role in the pipeline:</p>
+
+  <div style="overflow-x:auto">
+  <table class="map-table">
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Recommended τ</th>
+        <th>Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sym">ι-agent</td>
+        <td>0.0–0.1</td>
+        <td>File reading is nearly deterministic. The reader either works or doesn't. Minimal benefit from exploration.</td>
+      </tr>
+      <tr>
+        <td class="sym">φ-agent</td>
+        <td>0.1–0.3</td>
+        <td>Denoising parameters have a narrow optimal range. Some exploration helps (N2V vs median vs Gaussian), but the choice space is small.</td>
+      </tr>
+      <tr>
+        <td class="sym">σ-agent</td>
+        <td>0.2–0.5</td>
+        <td>Segmentation has the widest choice space (model, diameter, thresholds). Higher temperature lets the agent consider unconventional models. Self-correction loop with annealing.</td>
+      </tr>
+      <tr>
+        <td class="sym">μ-agent</td>
+        <td>0.1–0.2</td>
+        <td>Measurement selection is constrained by the biological question. Low uncertainty once the question is understood.</td>
+      </tr>
+      <tr>
+        <td class="sym">τ-agent</td>
+        <td>0.2–0.4</td>
+        <td>Tracking parameters (max displacement, gap closing) interact nonlinearly. Moderate exploration useful.</td>
+      </tr>
+      <tr>
+        <td class="sym">ε-agent</td>
+        <td>0.1</td>
+        <td>Quality judgement should be consistent. A quality gate that flips its verdict depending on the run is worse than useless.</td>
+      </tr>
+      <tr>
+        <td class="sym">ρ-agent</td>
+        <td>0.0–0.1</td>
+        <td>Format conversion is deterministic or near-deterministic. The conversion either works or it doesn't.</td>
+      </tr>
+      <tr>
+        <td class="sym">Meta-agent</td>
+        <td>0.5–0.8</td>
+        <td>Pipeline design benefits most from exploration. The meta-agent should consider unconventional composite combinations. This is where creativity matters.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="remark">
+    <div class="label">The ε-agent paradox</div>
+    <p>The ε-agent evaluates quality — it must be consistent (low τ). But it is also the agent that detects whether the pipeline is stuck in a local optimum — which requires noticing that alternatives exist (higher τ would help). The resolution is that the ε-agent's <em>judgement</em> is low-temperature (is this segmentation good?), but its <em>recommendation</em> can be higher-temperature (what should we try instead?). These are two separate Kleisli arrows composed sequentially: ε_judge(× τ=0.1) ; ε_suggest(× τ=0.5).</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>10. Structured Output and Type Constraints</h2>
+
+  <p>Modern LLM APIs offer <strong>structured output</strong> — constraining the model to emit valid JSON matching a schema. This is categorically a <strong>projection onto a sub-simplex</strong>: the vocabulary is partitioned into "valid next tokens" and "invalid next tokens" at each step, and invalid tokens are zeroed out before sampling.</p>
+
+  <div class="code-block"><span class="cm">-- Structured output as constrained sampling</span>
+<span class="cm">-- At each generation step:</span>
+valid_tokens <span class="op">=</span> grammar_mask(schema, generated_so_far)
+logits[~valid_tokens] <span class="op">=</span> -∞
+<span class="cm">-- Then apply temperature, top-k, top-p, sample as usual</span></div>
+
+  <p>In the stave, structured output is the <strong>type row</strong> acting on the agent's internal sampling. The type row constrains the agent's output type (ℕ for labels, ℝ for intensities, {1..N}² for graph edges). When the agent uses structured output with a schema matching the type row, the type constraint is enforced at the token level — every generated token is consistent with the declared type. The type row becomes a sampling constraint.</p>
+
+  <div class="theorem">
+    <div class="label">Proposition: Type-constrained sampling preserves the Kleisli structure</div>
+    <p>Let <code>C_S: Δ(V) → Δ(V_S)</code> be the constraint morphism that projects onto the valid token sub-simplex for schema <code>S</code>. Then <code>C_S ∘ T_τ = T_τ ∘ C_S</code> — constraining and temperature-scaling commute (because temperature scales all logits uniformly, and -∞ stays at -∞ under any finite scaling). The Kleisli composition of constrained agents is still well-typed: if agent 1 outputs type <code>A</code> and agent 2 expects type <code>A</code>, the pipeline types check regardless of temperature.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>11. The Measure-Theoretic View</h2>
+
+  <p>Pulling everything together, the full picture is a measure-theoretic one. Each agent box in the stave is a <strong>Markov kernel</strong> — a measurable function from the input space to probability measures on the output space:</p>
+
+  <div class="code-block"><span class="cm">-- A Markov kernel (transition kernel, stochastic map)</span>
+K <span class="op">::</span> <span class="ty">Input</span> <span class="op">-></span> <span class="ty">Measure</span> <span class="ty">Output</span>
+
+<span class="cm">-- Composition of Markov kernels is the Chapman-Kolmogorov equation</span>
+(K₂ ∘ K₁)(a, C) <span class="op">=</span> ∫ K₂(b, C) dK₁(a, b)
+
+<span class="cm">-- This IS Kleisli composition for the Giry monad</span>
+<span class="cm">-- The Giry monad G maps a measurable space X to G(X) = Measures(X)</span>
+<span class="cm">-- Kleisli arrows a → G(b) are exactly Markov kernels</span></div>
+
+  <p>The Giry monad is the "correct" monad for stochastic agents. It says that the space of probability measures on a measurable space is itself a measurable space, and Kleisli composition in the Giry monad is integration (the Chapman–Kolmogorov equation). This is exactly what happens when we compose two stochastic agents: the combined uncertainty is the integral of the second agent's uncertainty over all possible outputs of the first.</p>
+
+  <p>The sampling parameters — temperature, top-p, top-k — are <strong>natural transformations on the Giry monad</strong>. They modify the probability measure at each agent without changing the compositional structure. The stave's sequential composition (<code>;</code>) is still Kleisli composition in the Giry monad, regardless of what sampling parameters each agent uses.</p>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <h2>12. Practical Implications for the Stave</h2>
+
+  <p>What this means for notation and practice:</p>
+
+  <h3>Sampling parameters are ×, not &</h3>
+  <p>Temperature, top-p, top-k, and penalties are independent of the image data — they don't share an index with the data. They are <code>×</code> parameters. Exception: in the annealing schedule (§8), temperature depends on the iteration index, making it <code>&amp;</code>.</p>
+
+  <h3>The seed is a functor</h3>
+  <p>Setting a seed on all agents defines a section of the forgetful functor <code>U: Kleisli(Giry) → Set</code>. It collapses the stochastic pipeline to a deterministic one. This is useful for reproducibility and debugging: run the pipeline with a fixed seed, inspect the output, then remove the seed for production.</p>
+
+  <h3>Temperature compounds through composition</h3>
+  <p>Three agents at τ = 0.3 compound into more uncertainty than one agent at τ = 0.3. The Lipschitz budget from the metric geometry section applies: <code>L_pipeline ≤ ∏ L_agent</code>, where each agent's Lipschitz constant increases with temperature. Keep critical-path agents (ε, ρ) at low temperature to control the budget.</p>
+
+  <h3>Structured output + type row = token-level type safety</h3>
+  <p>When the agent uses structured output matching the type row's schema, every token is type-consistent. The type row is no longer just a post-hoc check — it is a <strong>constraint on the sampling process itself</strong>. Type errors become impossible, not just detectable.</p>
+
+  <h3>The meta-agent runs hottest</h3>
+  <p>Pipeline design is where exploration matters most. The meta-agent should use the highest temperature in the system (τ ≈ 0.5–0.8) to consider unusual composite combinations. Once a pipeline is designed and validated, the execution agents run cool (τ ≈ 0.1–0.3) for consistency.</p>
+
+  <hr class="sep">
+
+  <h2>Summary of Categorical Structures</h2>
+
+  <div style="overflow-x:auto">
+  <table class="map-table">
+    <thead>
+      <tr>
+        <th>Sampling parameter</th>
+        <th>Categorical role</th>
+        <th>Stave representation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sym">Temperature τ</td>
+        <td>Endomorphism on Δ(V), one-parameter semigroup T_τ</td>
+        <td>× on agent box</td>
+      </tr>
+      <tr>
+        <td class="sym">Top-p</td>
+        <td>Truncation morphism on Δ(V), discontinuous at boundary</td>
+        <td>× on agent box</td>
+      </tr>
+      <tr>
+        <td class="sym">Top-k</td>
+        <td>Idempotent projection Δ(V) → Δ_k(V), retraction</td>
+        <td>× on agent box</td>
+      </tr>
+      <tr>
+        <td class="sym">Frequency penalty</td>
+        <td>Stateful endomorphism on logit space (State monad)</td>
+        <td>× on agent box</td>
+      </tr>
+      <tr>
+        <td class="sym">Presence penalty</td>
+        <td>Stateful endomorphism on logit space (State monad)</td>
+        <td>× on agent box</td>
+      </tr>
+      <tr>
+        <td class="sym">Seed</td>
+        <td>Section of forgetful functor Kleisli(Giry) → Set</td>
+        <td>× on agent box (collapses stochasticity)</td>
+      </tr>
+      <tr>
+        <td class="sym">Prompt</td>
+        <td>Functor Prompt → Dist (determines logits)</td>
+        <td>Box content (morphism type + semantic role)</td>
+      </tr>
+      <tr>
+        <td class="sym">Structured output</td>
+        <td>Grammar-constrained projection, commutes with T_τ</td>
+        <td>Type row (constraint on output schema)</td>
+      </tr>
+      <tr>
+        <td class="sym">Full sampling chain</td>
+        <td>Markov kernel, Kleisli arrow in Giry monad</td>
+        <td>The agent box itself</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>All sampling parameters are morphisms on probability measures — endomorphisms, projections, or truncations on the simplex <code>Δ(V)</code>. They enter the stave as <code>×</code> parameters because they are independent of the image data. The Giry monad provides the Kleisli category in which stochastic agents compose. Temperature is the single most important parameter because it directly controls the entropy of each agent's hom-object in the enriched category — it is the dial between determinism and exploration.</p>
+
+  <footer class="footer">
+    Stave Notation v0.5 · FILM, Imperial College London
+  </footer>
+
+</div>
