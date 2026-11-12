@@ -1,0 +1,1320 @@
+<title>GA & Metric Geometry in Stave</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #FAF8F5;
+  --fg: #2C2520;
+  --fg2: #5C554D;
+  --fg3: #8A8279;
+  --surface: #F0ECE6;
+  --surface2: #E8E3DB;
+  --border: #D8D2C8;
+  --accent: #1A7A6D;
+  --accent-bg: #E6F5F2;
+  --accent2: #B85C2F;
+  --accent2-bg: #FBF0E8;
+
+  /* morphism badges */
+  --mu: #C83E3E;
+  --mu-bg: #FDE8E8;
+  --sigma: #2E6EB5;
+  --sigma-bg: #E4F0FB;
+  --phi: #B07D20;
+  --phi-bg: #FBF4E0;
+  --rho: #7B3FA0;
+  --rho-bg: #F3E8FB;
+  --tau: #2D8A4E;
+  --tau-bg: #E4F5EB;
+
+  /* framework badges */
+  --ga: #9B4DCA;
+  --ga-bg: #F3E8FB;
+  --met: #1A7A6D;
+  --met-bg: #E6F5F2;
+  --combo: #B85C2F;
+  --combo-bg: #FBF0E8;
+
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+  --max-w: 900px;
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1A1816;
+    --fg: #E8E2DA;
+    --fg2: #B0A89E;
+    --fg3: #7A726A;
+    --surface: #252220;
+    --surface2: #302C28;
+    --border: #3E3A35;
+    --accent: #3CBFAD;
+    --accent-bg: #1A2E2B;
+    --accent2: #E0845A;
+    --accent2-bg: #2E2218;
+
+    --mu: #F07070;
+    --mu-bg: #2E1A1A;
+    --sigma: #5CA0E0;
+    --sigma-bg: #1A2438;
+    --phi: #E0B040;
+    --phi-bg: #2E2818;
+    --rho: #B87DE0;
+    --rho-bg: #261A38;
+    --tau: #5DC87A;
+    --tau-bg: #1A2E20;
+
+    --ga: #C88AEE;
+    --ga-bg: #261A38;
+    --met: #3CBFAD;
+    --met-bg: #1A2E2B;
+    --combo: #E0845A;
+    --combo-bg: #2E2218;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1A1816;
+  --fg: #E8E2DA;
+  --fg2: #B0A89E;
+  --fg3: #7A726A;
+  --surface: #252220;
+  --surface2: #302C28;
+  --border: #3E3A35;
+  --accent: #3CBFAD;
+  --accent-bg: #1A2E2B;
+  --accent2: #E0845A;
+  --accent2-bg: #2E2218;
+
+  --mu: #F07070;
+  --mu-bg: #2E1A1A;
+  --sigma: #5CA0E0;
+  --sigma-bg: #1A2438;
+  --phi: #E0B040;
+  --phi-bg: #2E2818;
+  --rho: #B87DE0;
+  --rho-bg: #261A38;
+  --tau: #5DC87A;
+  --tau-bg: #1A2E20;
+
+  --ga: #C88AEE;
+  --ga-bg: #261A38;
+  --met: #3CBFAD;
+  --met-bg: #1A2E2B;
+  --combo: #E0845A;
+  --combo-bg: #2E2218;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  line-height: 1.65;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-block: 0;
+}
+
+h1 { font-size: 1.75rem; font-weight: 800; margin: 2rem 0 0.25rem; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 1.3rem; font-weight: 700; margin: 2.5rem 0 0.75rem; letter-spacing: -0.01em; color: var(--fg); border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+h3 { font-size: 1.05rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--fg2); }
+p { margin: 0.6rem 0; color: var(--fg2); }
+.subtitle { color: var(--fg3); font-size: 0.9rem; margin-bottom: 2rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: var(--fg); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--surface); padding: 0.15em 0.35em; border-radius: 4px; }
+
+/* --- Navigation --- */
+nav {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 0;
+  margin: 0 -16px;
+  padding-inline: 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+nav a {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg3);
+  padding: 0.3rem 0.7rem;
+  border-radius: 99px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+nav a:hover { color: var(--fg); background: var(--surface); }
+nav .sep { color: var(--border); padding: 0 0.2rem; user-select: none; }
+
+/* --- Badges --- */
+.badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.badge-ga { background: var(--ga-bg); color: var(--ga); }
+.badge-met { background: var(--met-bg); color: var(--met); }
+.badge-combo { background: var(--combo-bg); color: var(--combo); }
+.badge-mu { background: var(--mu-bg); color: var(--mu); }
+.badge-sigma { background: var(--sigma-bg); color: var(--sigma); }
+.badge-phi { background: var(--phi-bg); color: var(--phi); }
+.badge-rho { background: var(--rho-bg); color: var(--rho); }
+.badge-tau { background: var(--tau-bg); color: var(--tau); }
+
+/* --- Operation cards --- */
+.op {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+}
+.op-head { margin-bottom: 0.75rem; }
+.op-title { font-weight: 700; font-size: 1.1rem; margin-left: 0.4rem; color: var(--fg); }
+.op-brief { margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--fg3); }
+
+/* --- Stave blocks --- */
+pre.stave {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--fg);
+}
+pre.stave .cmt { color: var(--fg3); font-style: italic; }
+
+/* --- Example callouts --- */
+.ex {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 0.8rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--fg2);
+}
+.ex-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.ex-ga {
+  background: var(--ga-bg);
+  border-left-color: var(--ga);
+}
+.ex-ga .ex-label { color: var(--ga); }
+.ex-combo {
+  background: var(--combo-bg);
+  border-left-color: var(--combo);
+}
+.ex-combo .ex-label { color: var(--combo); }
+
+/* --- Tables --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 1rem 0;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  color: var(--fg);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg2);
+  vertical-align: top;
+}
+.tbl-wrap { overflow-x: auto; }
+
+/* --- Summary box --- */
+.summary {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+.summary h3 { color: var(--accent); margin-top: 0; }
+
+/* --- Diagram container --- */
+.diagram-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 1.25rem 0;
+  text-align: center;
+}
+.diagram-box svg { max-width: 100%; height: auto; }
+
+/* --- Pill sections --- */
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
+.pill {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.25em 0.65em;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  color: var(--fg2);
+  background: var(--bg);
+}
+</style>
+
+<h1>Geometric Algebra &amp; Metric Geometry</h1>
+<p class="subtitle">Two frameworks, one <code>&amp;</code> container — stave notation schemas with microscopy examples</p>
+
+<nav>
+  <a href="#intro">Overview</a>
+  <span class="sep">·</span>
+  <a href="#ga-types">GA Types</a>
+  <span class="sep">·</span>
+  <a href="#ga-ops">GA Ops</a>
+  <span class="sep">·</span>
+  <a href="#met-ops">Metric Ops</a>
+  <span class="sep">·</span>
+  <a href="#bridge">The & Bridge</a>
+  <span class="sep">·</span>
+  <a href="#combined">Combined Pipelines</a>
+  <span class="sep">·</span>
+  <a href="#classify">Classification</a>
+  <span class="sep">·</span>
+  <a href="#category">Category Theory</a>
+</nav>
+
+<!-- ============================================================ -->
+<section id="intro">
+<h2>1. Two Frameworks, One Container</h2>
+
+<p>Geometric algebra (GA) and metric geometry address <strong>orthogonal aspects of the same spatial reality</strong>. GA gives an <em>algebra of transformations</em>: rotations, reflections, and rigid motions composed by multiplying rotors and motors. Metric geometry gives a <em>calculus of distances</em>: Hausdorff distance between shapes, Wasserstein between distributions, geodesics through obstacles.</p>
+
+<p>In Stave Notation, both enter through the <code>&amp;</code> operator — the container that carries spatial structure alongside data. GA operations are primarily <code>φ</code> (transforms that preserve or scale the metric) and <code>ρ</code> (representation changes between algebraic encodings). Metric geometry operations span all morphism types — <code>μ</code> reads the metric, <code>σ</code> partitions by it, <code>τ</code> rearranges according to it.</p>
+
+<div class="diagram-box">
+<svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="font-family: Inter, system-ui, sans-serif;">
+  <!-- GA side -->
+  <rect x="20" y="30" width="220" height="160" rx="12" fill="none" stroke="var(--ga)" stroke-width="2" stroke-dasharray="6 3"/>
+  <text x="130" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ga)">Geometric Algebra</text>
+  <text x="130" y="60" text-anchor="middle" font-size="11" fill="var(--fg2)">Transformations</text>
+  <text x="130" y="82" text-anchor="middle" font-size="10" fill="var(--fg3)">φ: Rotor (rotation)</text>
+  <text x="130" y="98" text-anchor="middle" font-size="10" fill="var(--fg3)">φ: Motor (rigid body)</text>
+  <text x="130" y="114" text-anchor="middle" font-size="10" fill="var(--fg3)">ρ: EmbedCGA (conformal)</text>
+  <text x="130" y="130" text-anchor="middle" font-size="10" fill="var(--fg3)">ρ: MarchingCubes (mesh)</text>
+  <text x="130" y="155" text-anchor="middle" font-size="11" fill="var(--fg2)">Types: ⋀ᵏGⁿ grades</text>
+  <text x="130" y="175" text-anchor="middle" font-size="10" fill="var(--fg3)">vectors, bivectors, rotors</text>
+
+  <!-- Centre: & bridge -->
+  <rect x="290" y="50" width="180" height="120" rx="10" fill="var(--surface)" stroke="var(--accent2)" stroke-width="2.5"/>
+  <text x="380" y="80" text-anchor="middle" font-size="16" font-weight="800" fill="var(--accent2)">&amp;</text>
+  <text x="380" y="100" text-anchor="middle" font-size="12" font-weight="600" fill="var(--fg)">Metric Container</text>
+  <text x="380" y="118" text-anchor="middle" font-size="10" fill="var(--fg3)">Shared shape,</text>
+  <text x="380" y="132" text-anchor="middle" font-size="10" fill="var(--fg3)">different positions</text>
+  <text x="380" y="155" text-anchor="middle" font-size="10" font-weight="600" fill="var(--accent2)">Both read &amp; write here</text>
+
+  <!-- Metric side -->
+  <rect x="520" y="30" width="220" height="160" rx="12" fill="none" stroke="var(--met)" stroke-width="2" stroke-dasharray="6 3"/>
+  <text x="630" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="var(--met)">Metric Geometry</text>
+  <text x="630" y="60" text-anchor="middle" font-size="11" fill="var(--fg2)">Measurements &amp; Structure</text>
+  <text x="630" y="82" text-anchor="middle" font-size="10" fill="var(--fg3)">μ: Distance, Hausdorff</text>
+  <text x="630" y="98" text-anchor="middle" font-size="10" fill="var(--fg3)">σ: Voronoi, DBSCAN</text>
+  <text x="630" y="114" text-anchor="middle" font-size="10" fill="var(--fg3)">ρ: MetricGraph, MDS</text>
+  <text x="630" y="130" text-anchor="middle" font-size="10" fill="var(--fg3)">τ: kNN-Graph, ε-Net</text>
+  <text x="630" y="155" text-anchor="middle" font-size="11" fill="var(--fg2)">Structures: d(x,y)</text>
+  <text x="630" y="175" text-anchor="middle" font-size="10" fill="var(--fg3)">Euclidean, graph, geodesic</text>
+
+  <!-- Arrows -->
+  <line x1="240" y1="110" x2="288" y2="110" stroke="var(--ga)" stroke-width="2" marker-end="url(#arrowGA)"/>
+  <line x1="470" y1="110" x2="518" y2="110" stroke="var(--met)" stroke-width="2" marker-end="url(#arrowMet)"/>
+
+  <defs>
+    <marker id="arrowGA" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="var(--ga)"/>
+    </marker>
+    <marker id="arrowMet" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto-start-reverse">
+      <path d="M8,0 L0,3 L8,6" fill="var(--met)"/>
+    </marker>
+  </defs>
+</svg>
+</div>
+
+<p>The key insight: <strong>GA provides the morphisms</strong> (how to transform), <strong>metric geometry provides the enrichment</strong> (how to measure what those transformations did). A GA rotor is an isometry — it preserves the metric. Metric geometry classifies that fact. Neither replaces the other.</p>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="ga-types">
+<h2>2. GA Type System in Stave Notation</h2>
+
+<p>Geometric algebra places direction, orientation and pose in the <strong>type row</strong> of a stave container. Use GA types when geometry matters — when the data carries direction, orientation, or chirality that ordinary ℝⁿ coordinates would lose.</p>
+
+<div class="op">
+<h3>Data types: simple vs GA</h3>
+<pre class="stave"><span class="cmt">When to use GA types in the bottom line of a stave</span>
+
+Simple         GA equivalent          When to use GA
+───────────────────────────────────────────────────────────
+ℝ              s ∈ ⋀⁰Gⁿ              never (scalar is scalar)
+ℕ              —                      never
+{0,1}          —                      never
+text           —                      no GA equivalent
+(x,y) ∈ ℝ²    v ∈ ⋀¹G²              when direction matters
+(x,y,z) ∈ ℝ³  v ∈ ⋀¹G³              registration, flow fields
+Δ₂ triangle    B ∈ ⋀²G³              oriented surfaces, curvature
+Δ₃ tet         T ∈ ⋀³G³              oriented volumes
+—              S ∈ ⋀¹G⁴˙¹             conformal spheres (CGA)
+—              J ∈ G²(ℂ)             polarisation optics
+—              M ∈ Gⁿ                full multivector (stress, DTI)
+</pre>
+</div>
+
+<div class="op">
+<h3>Clifford grades and algebras</h3>
+<pre class="stave"><span class="cmt">GA grades — the k in ⋀ᵏGⁿ</span>
+
+⋀⁰Gⁿ     scalar         ⋀¹Gⁿ     vector
+⋀²Gⁿ     bivector       ⋀³Gⁿ     trivector
+Gⁿ        full multivector
+
+<span class="cmt">Common algebras used in microscopy</span>
+
+G²     2D plane        G³     3D space        G⁴˙¹   conformal 3D (CGA)
+G²(ℂ)  complex plane   G³˙¹   projective GA (PGA, rigid motions)
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Key principle</div>
+    <strong>GA products map to stave cap operations.</strong>
+    Inner product a · b is grade ↓ (⊃ cap, contraction/projection).
+    Outer product a ∧ b is grade ↑ (⊂ cap, span/surface from edges).
+    Geometric product ab is mixed grades (□ box, rotation/reflection).
+  </div>
+</div>
+
+<div class="op">
+<h3>Object representations: simple vs GA</h3>
+<pre class="stave"><span class="cmt">Six object encodings — three gain from GA types</span>
+
+Raster              ξy,x ══ ObjectID ∈ ℕ           (always simple)
+Spots (simple)      Objects ── Columns ── (x,y,z,r) ∈ ℝ⁴
+Spots (CGA)         Objects ── Columns ── S ∈ ⋀¹G⁴˙¹   <span class="cmt">← conformal sphere</span>
+Contour             Objects ── Vertices:k ── (y,x) ∈ ℝ²
+Surface mesh        Vertices ── v ∈ ⋀¹G³ ── &amp; Faces ── B ∈ ⋀²G³
+Volume mesh         Vertices ── v ∈ ⋀¹G³ ── &amp; Cells ── T ∈ ⋀³G³
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Why this matters</div>
+    <strong>The type row determines what measurements are available.</strong> A surface mesh with bivector normals (B ∈ ⋀²G³) gives you Gaussian curvature directly — the wedge product computes the normal, the geometric product measures turning. A contour with ℝ² coordinates must approximate curvature from finite differences. The encoding choice is a choice about which μ boxes downstream can see.
+  </div>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="ga-ops">
+<h2>3. GA Operations in Stave Notation</h2>
+
+<!-- φ: Rotor -->
+<div class="op" id="ga-rotor">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-phi">φ</span>
+    <span class="op-title">Rotor — Rotation</span>
+    <p class="op-brief">R = e<sup>Bθ/2</sup> — rotation without matrices, any dimension. Sandwiching: x → RxR̃.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">φ: Rotor — rotation as sandwiching by R = e^(Bθ/2)</span>
+
+ξy,x: 1024                            Calibration: 1
+══════════════                         ──────────────
+v ∈ ⋀¹G³ (position vectors)   &amp;      pixelSize: 0.065 μm/px
+──────────────                         ──────────────
+
+                × R = e^(Bθ/2) ∈ Spin(3)
+
+; φ: Rotate (x → RxR̃)
+
+ξy,x: 1024                            Calibration: 1
+══════════════                         ──────────────
+v' ∈ ⋀¹G³ (rotated)           &amp;      pixelSize: 0.065 μm/px (unchanged)
+──────────────                         ──────────────
+
+<span class="cmt">Rotor is ×: same rotation for all pixels.</span>
+<span class="cmt">Metric &amp; unchanged — rotation is an isometry.</span>
+<span class="cmt">φ sits below ≡≡/══ — structure passes over (Rule 3).</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Light-sheet multi-view fusion.</strong> Two views of a zebrafish embryo imaged at 45° angles. Each view's position vectors are typed as v ∈ ⋀¹G³. The alignment rotor R₁₂ = e<sup>Bθ/2</sup> is computed from fiducial beads, then applied as φ: Rotate on View₂. The rotor composes naturally: fusing four views is R₁₂ · R₁₃ · R₁₄ — three multiplications, not three matrix decompositions. Metric &amp; (pixelSize) is unchanged because rotation is an isometry.
+  </div>
+</div>
+
+<!-- φ: Motor -->
+<div class="op" id="ga-motor">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-phi">φ</span>
+    <span class="op-title">Motor — Rigid Body Motion</span>
+    <p class="op-brief">M ∈ G³˙¹ — translation + rotation as a single algebraic object (PGA).</p>
+  </div>
+<pre class="stave">
+<span class="cmt">φ: Motor — rigid motion in projective geometric algebra (PGA)</span>
+
+Modality₁                        Modality₂
+──────────────                   ──────────────
+ξy,x: 1024                      ξy,x: 1024
+══════════════                   ══════════════
+v ∈ ⋀¹G³           ×           v ∈ ⋀¹G³
+──────────────                   ──────────────
+
+                × M ∈ G³˙¹  (motor = translator · rotor)
+
+; φ: Motor M on Modality₂
+; ⊃ contract (overlay)
+
+Registered
+──────────────
+ξy,x: 1024
+══════════════
+v ∈ ⋀¹G³
+──────────────
+
+<span class="cmt">Motor M = T · R captures translation + rotation.</span>
+<span class="cmt">Factorises as M = e^(L·d/2) where L = line, d = displacement.</span>
+<span class="cmt">Interpolation: M^t for t ∈ [0,1] — smooth rigid motion.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Cross-modal registration — CLEM (correlative light and electron microscopy).</strong> Fluorescence confocal (Modality₁) and FIB-SEM (Modality₂) images of the same cell. The motor M ∈ G³˙¹ found by landmark matching captures the full rigid alignment — rotation and translation — in one object. Advantage over a 4×4 matrix: the motor interpolates smoothly (M<sup>t</sup> for t ∈ [0,1]), composes by multiplication, and decomposes uniquely into a screw axis (the line L), rotation angle, and translation distance along L.
+  </div>
+</div>
+
+<!-- ρ: Mesh extraction with GA normals -->
+<div class="op" id="ga-mesh">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-rho">ρ</span>
+    <span class="op-title">Mesh Extraction — Oriented Surfaces</span>
+    <p class="op-brief">ρ: MarchingCubes produces vertices (vectors) &amp; faces (bivector normals).</p>
+  </div>
+<pre class="stave">
+<span class="cmt">ρ: MarchingCubes — from voxels to oriented surface mesh</span>
+
+MembraneGFP
+──────────────
+ξz,y,x: 128, 512, 512
+≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+ℝ: [0..2¹⁶]
+──────────────
+
+; σ: Cellpose3D ; ρ: MarchingCubes
+
+Vertices: 1..V               Faces: 1..F
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: v₁,v₂,v₃
+──────────────               ──────────────
+v ∈ ⋀¹G³                    B ∈ ⋀²G³
+──────────────               ──────────────
+
+<span class="cmt">B = (v₂−v₁) ∧ (v₃−v₁)    bivector normal</span>
+<span class="cmt">|B| = area of face.  B/|B| = unit normal.</span>
+<span class="cmt">Vertices &amp; Faces share the vertex index set.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Cell surface curvature from membrane-labelled 3D confocal.</strong> A GFP-membrane-labelled cell imaged at 63× on a Nikon AX R. After 3D segmentation, marching cubes extracts a triangular mesh. Each face carries a bivector normal B ∈ ⋀²G³ — the wedge product of two edges. The bivector encodes both the area (|B|) and the orientation (B/|B|), so downstream μ: Curvature computes Gaussian curvature from the angular deficit of bivector normals around each vertex — no separate normal-estimation step needed.
+  </div>
+</div>
+
+<!-- μ: Curvature via GA -->
+<div class="op" id="ga-curv">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-mu">μ</span>
+    <span class="op-title">Curvature — from Bivector Normals</span>
+    <p class="op-brief">Gaussian and mean curvature computed from angular deficit of ⋀²G³ normals.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">μ: Curvature — measured from oriented mesh</span>
+
+Vertices: 1..V               Faces: 1..F
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: v₁,v₂,v₃
+──────────────               ──────────────
+v ∈ ⋀¹G³                    B ∈ ⋀²G³
+──────────────               ──────────────
+
+; μ: Curvature
+
+Records: 1..V
+──────────────
+Columns: MeanCurv, GaussCurv
+──────────────
+ℝ
+──────────────
+
+<span class="cmt">GA advantage: curvature = angular deficit of bivectors.</span>
+<span class="cmt">Both stacks collapse → per-vertex scalar features.</span>
+<span class="cmt">No matrix eigendecomposition needed.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Filopodia curvature in an invasive cancer cell.</strong> A phalloidin-stained cell extracted as a mesh. Mean curvature identifies the tips of filopodia (high positive curvature) and the base of lamellipodia (near-zero curvature). Gaussian curvature distinguishes spherical protrusions (K > 0) from saddle-shaped invaginations (K < 0). Both are computed from the bivector normals without converting to a matrix representation.
+  </div>
+</div>
+
+<!-- μ: Orientation statistics -->
+<div class="op" id="ga-nematic">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-mu">μ</span>
+    <span class="op-title">Nematic Order — Orientation Statistics</span>
+    <p class="op-brief">Fréchet mean on Spin(n) — correct statistics on the rotation group.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">μ: NematicOrder — collective orientation from edge rotors</span>
+
+Cells: 1..N                  Adjacency: 1..E
+──────────────               ──────────────
+Columns: orientation &amp;       Columns: c₁,c₂
+──────────────               ──────────────
+v ∈ ⋀¹G²                    {1..N}² × R ∈ ⋀⁰G²+⋀²G²
+──────────────               ──────────────
+
+<span class="cmt">R₁₂ = v₂ v₁⁻¹  (relative rotor between neighbours)</span>
+
+; μ: NematicOrder (global)
+
+Scalar: 1
+──────────────
+Columns: S
+──────────────
+ℝ: [0..1]
+──────────────
+
+<span class="cmt">S = 1: aligned.  S = 0: isotropic.</span>
+<span class="cmt">Both stacks collapse to one scalar.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Epithelial cell alignment in a wound-healing assay.</strong> Each cell's long-axis orientation is stored as a unit vector v ∈ ⋀¹G². The relative rotor R₁₂ = v₂v₁⁻¹ between adjacent cells captures their angular mismatch directly — no atan2 or modular arithmetic. The nematic order parameter S (eigenvalue of the Q-tensor) quantifies collective alignment: S ≈ 1 at the wound edge (cells aligned perpendicular to the scratch) vs S ≈ 0.3 in the monolayer interior.
+  </div>
+</div>
+
+<!-- μ: Motion features from motors -->
+<div class="op" id="ga-motion">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-mu">μ</span>
+    <span class="op-title">Motion Features — from Tracking Motors</span>
+    <p class="op-brief">Per-link motor M ∈ G³˙¹ decomposes into speed, angular velocity, chirality.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">μ: MotionFeatures — measured from tracking motors</span>
+
+Detections: 1..D             Links: 1..L
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: d₁, d₂
+──────────────               ──────────────
+v ∈ ⋀¹G³                    {1..D}² × M ∈ G³˙¹
+──────────────               ──────────────
+
+<span class="cmt">Motor M per link: rotation + translation.</span>
+
+; μ: MotionFeatures
+
+Records: 1..K
+──────────────
+Columns: Speed, AngVelocity, Chirality
+──────────────
+ℝ
+──────────────
+
+<span class="cmt">Speed = |translation part of M|.</span>
+<span class="cmt">AngVelocity = |bivector part of M| / Δt.</span>
+<span class="cmt">Chirality = sign of the pseudoscalar part.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Vesicle trafficking along microtubules.</strong> GFP-Rab5 vesicles tracked in 3D confocal time-lapse. Each inter-frame link stores a motor M ∈ G³˙¹ capturing the full rigid motion — not just displacement but also rotation. Speed and angular velocity are extracted algebraically. Chirality (left- vs right-handed helical motion) drops out from the pseudoscalar component — a quantity invisible to conventional (x,y,z) tracking.
+  </div>
+</div>
+
+<!-- ρ: CGA embedding -->
+<div class="op" id="ga-cga">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-rho">ρ</span>
+    <span class="op-title">Conformal Embedding (CGA)</span>
+    <p class="op-brief">Embed ℝ³ into G⁴˙¹ where spheres, planes, circles become algebraic objects.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">ρ: EmbedCGA — lift points to conformal geometric algebra</span>
+
+Spots: 1..N                  Metric
+──────────────               ──────────────
+Columns: x, y, z  &amp;         Calibrated Euclidean
+──────────────               ──────────────
+ℝ³                           pixelSize: 0.065 μm/px
+──────────────               ──────────────
+
+; ρ: EmbedCGA (p → p + ½p²e∞ + e₀)
+
+Spots: 1..N                  Metric
+──────────────               ──────────────
+Columns: P         &amp;         Conformal (inner product)
+──────────────               ──────────────
+S ∈ ⋀¹G⁴˙¹                  d(a,b)² = −2a·b
+──────────────               ──────────────
+
+<span class="cmt">Points become null vectors. Distance from inner product.</span>
+<span class="cmt">Spheres = points in CGA. Planes = spheres through ∞.</span>
+<span class="cmt">All conformal transforms (rot, trans, dilation) are rotors.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Fitting spheres to detected spots — FISH loci.</strong> FISH spot positions in 3D are lifted to CGA. In this space, fitting a sphere to a cluster of points is a linear operation — the sphere is itself a vector in G⁴˙¹, and least-squares fitting is a projection. The radius gives the cluster size; the centre gives its position. For a PALM/STORM dataset, CGA circle fitting gives the radius of ring-like protein structures (nuclear pore complexes, ~50 nm) directly from the localisation coordinates.
+  </div>
+</div>
+
+<!-- Tissue deformation -->
+<div class="op" id="ga-deform">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-mu">μ</span>
+    <span class="op-title">Tissue Deformation — Strain from Motors</span>
+    <p class="op-brief">Per-edge deformation motor M = T · R · S decomposes into stretch, shear, rotation.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Tissue deformation field — per-edge motors between timepoints</span>
+
+Cells_t: 1..N                Cells_t+1: 1..N
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: pos
+──────────────               ──────────────
+v ∈ ⋀¹G³                    v' ∈ ⋀¹G³
+──────────────               ──────────────
+
+       &amp;
+
+Adjacency: 1..E
+──────────────
+Columns: c₁, c₂
+──────────────
+{1..N}² × M ∈ G³˙¹ (deformation motor)
+──────────────
+
+<span class="cmt">M = T · R · S (translate · rotate · strain)</span>
+
+; μ: StrainFeatures
+
+Records: 1..E
+──────────────
+Columns: Stretch, Shear, Rotation
+──────────────
+ℝ
+──────────────
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Gastrulation mechanics in a live embryo.</strong> Nuclei tracked across two timepoints. Each edge in the adjacency graph carries a deformation motor decomposing into stretch (tissue expansion), shear (sliding), and rotation (bending). The motor factorisation is unique — unlike eigendecomposition of a deformation gradient tensor, which has multiple valid decompositions. Maps of per-edge stretch reveal the convergent extension zone; maps of rotation reveal the bending of the archenteron.
+  </div>
+</div>
+
+<!-- Polarisation -->
+<div class="op" id="ga-pol">
+  <div class="op-head">
+    <span class="badge badge-ga">GA</span>
+    <span class="badge badge-phi">φ</span>
+    <span class="op-title">Polarisation Optics — Complex Clifford</span>
+    <p class="op-brief">Jones vectors in G²(ℂ). Waveplate retardation as rotor in the complex plane.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Polarisation microscopy — Jones calculus in GA</span>
+
+Channels: H, V
+──────────────
+ξy,x: 1024
+══════════════
+J ∈ G²(ℂ)
+──────────────
+
+; φ: Waveplate(δ) ; μ: Stokes
+
+Records: 1
+──────────────
+Columns: S₀, S₁, S₂, S₃
+──────────────
+ℝ
+──────────────
+
+<span class="cmt">Jones vector J = E_H e₁ + E_V e₂ with E ∈ ℂ.</span>
+<span class="cmt">Waveplate = rotor in complex Clifford algebra.</span>
+<span class="cmt">Stokes parameters from JJ† — bilinear in J.</span>
+</pre>
+  <div class="ex ex-ga">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Birefringence imaging of collagen in polarised light microscopy.</strong> The Jones vector J ∈ G²(ℂ) at each pixel encodes polarisation state. A quarter-wave plate is a rotor e<sup>iπ/4·e₁₂</sup> in the complex Clifford algebra. Stokes parameters (S₀–S₃) are extracted as μ from the bilinear form JJ†. Birefringence retardance maps collagen fibre orientation in skin, tendon, and corneal tissue.
+  </div>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="met-ops">
+<h2>4. Metric Geometry Operations — Summary</h2>
+
+<p>Full schemas and microscopy examples for all 25+ metric geometry operations are in the <strong>Metric Geometry Stave Notation</strong> reference. Here is a condensed table of the operations, grouped by morphism type, with their relationship to the metric <code>&amp;</code> container.</p>
+
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr><th>Type</th><th>Operation</th><th>What it does</th><th>Effect on metric &amp;</th></tr>
+</thead>
+<tbody>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>Distance</td><td>Pairwise calibrated distance</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>DistanceMatrix</td><td>All-pairs N×N distances</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>Hausdorff</td><td>Max-min distance between sets</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>Wasserstein</td><td>Optimal transport between distributions</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>Curvature</td><td>Gaussian/mean from metric tensor</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>Sholl</td><td>Concentric sphere intersections</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-mu">μ</span></td><td>GromovDelta</td><td>Tree-likeness (δ-hyperbolicity)</td><td>Reads &amp;, then drops</td></tr>
+  <tr><td><span class="badge badge-sigma">σ</span></td><td>Voronoi</td><td>Nearest-seed tessellation</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-sigma">σ</span></td><td>DBSCAN</td><td>Density-based clustering</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-sigma">σ</span></td><td>MetricBall</td><td>ε-neighbourhood of a point</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-phi">φ</span></td><td>DistanceTransform</td><td>Per-pixel boundary distance</td><td>Reads &amp; calibration</td></tr>
+  <tr><td><span class="badge badge-phi">φ</span></td><td>MetricProjection</td><td>Nearest point on a subset</td><td>Non-expansive (L = 1)</td></tr>
+  <tr><td><span class="badge badge-phi">φ</span></td><td>Isometry</td><td>Distance-preserving map</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-phi">φ</span></td><td>LipschitzMap</td><td>Bounded distortion: d′ ≤ L·d</td><td>&amp; scaled ≤ L</td></tr>
+  <tr><td><span class="badge badge-phi">φ</span></td><td>QuasiIsometry</td><td>Coarse equivalence</td><td>&amp; quasi-preserved</td></tr>
+  <tr><td><span class="badge badge-rho">ρ</span></td><td>MetricGraph</td><td>Skeleton → weighted graph</td><td>&amp; form changes</td></tr>
+  <tr><td><span class="badge badge-rho">ρ</span></td><td>GeodesicDistField</td><td>Per-pixel geodesic from seed</td><td>&amp; form changes</td></tr>
+  <tr><td><span class="badge badge-rho">ρ</span></td><td>EmbedInAmbient</td><td>MDS: distance matrix → ℝᵏ</td><td>&amp; form changes</td></tr>
+  <tr><td><span class="badge badge-rho">ρ</span></td><td>MetricCompletion</td><td>Add limit points (Cauchy)</td><td>&amp; form changes</td></tr>
+  <tr><td><span class="badge badge-tau">τ</span></td><td>kNN-Graph</td><td>k nearest neighbours</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-tau">τ</span></td><td>ε-Net</td><td>Covering/subsampling</td><td>&amp; unchanged</td></tr>
+  <tr><td><span class="badge badge-tau">τ</span></td><td>MetricFilter</td><td>Remove by distance criterion</td><td>&amp; unchanged</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="bridge">
+<h2>5. The &amp; Bridge — Where GA Meets Metric</h2>
+
+<p>The <code>&amp;</code> container carries the metric structure that both frameworks read and write. GA operations primarily <strong>transform</strong> data while the metric &amp; passes through (isometry) or scales (Lipschitz). Metric geometry operations <strong>read</strong> the metric to measure, partition, or rearrange.</p>
+
+<div class="op">
+<h3>What happens to metric &amp; under each operation type</h3>
+<pre class="stave">
+<span class="cmt">GA operations — effect on metric &amp;</span>
+
+φ: Rotor R = e^(Bθ/2)         &amp; unchanged      (isometry: d_out = d_in)
+φ: Motor M ∈ G³˙¹              &amp; unchanged      (isometry: rigid motion)
+φ: Versor (reflection)         &amp; unchanged      (isometry)
+φ: Dilator D = e^(αI/2)       &amp; scaled by e^α  (Lipschitz, L = e^α)
+ρ: EmbedCGA                   &amp; form changes    (Euclidean → conformal inner product)
+ρ: MarchingCubes               &amp; form changes    (voxel grid → mesh connectivity)
+
+<span class="cmt">Metric geometry operations — effect on metric &amp;</span>
+
+μ: Distance, Hausdorff, ...    &amp; consumed       (read &amp;, produce scalar)
+σ: Voronoi, DBSCAN, ...       &amp; preserved       (partition, &amp; unchanged)
+φ: Isometry                    &amp; unchanged       (L = 1 both ways)
+φ: LipschitzMap                &amp; scaled ≤ L      (bounded distortion)
+ρ: MetricGraph, MDS, ...      &amp; form changes     (new metric representation)
+τ: kNN-Graph, ε-Net, ...      &amp; preserved       (rearrange, &amp; unchanged)
+</pre>
+</div>
+
+<p>The convergence point is <strong>isometry</strong>. A GA rotor that satisfies RR̃ = 1 is exactly an isometry — it preserves the metric. A metric geometry Isometry with L = 1 both ways is exactly what that rotor computes. The mathematical content is the same; the two frameworks describe it from opposite ends.</p>
+
+<div class="summary">
+  <h3>The quadratic form IS the metric</h3>
+  <p>In GA, the quadratic form Q(v) = v² that defines a Clifford algebra <em>is</em> a metric. The signature (p,q,r) determines the geometry: Euclidean (n,0,0), Minkowski (3,1,0), conformal (n+1,1,0). In CGA, two points a and b become null vectors, and:</p>
+  <p style="text-align:center; font-family: var(--mono); font-size: 1.1rem; color: var(--accent); margin: 0.75rem 0;"><strong>d(a,b)² = −2 a·b</strong></p>
+  <p>The inner product <em>is</em> the distance function. A rotor that preserves the inner product preserves distances. This is why GA transformations and metric geometry measurements compose naturally through the same <code>&amp;</code> container.</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="combined">
+<h2>6. Combined Pipelines — Microscopy Examples</h2>
+
+<p>These pipelines use both frameworks together: GA for the transformations, metric geometry for the measurements. The <code>&amp;</code> container carries metric structure through the entire chain.</p>
+
+<!-- Combined 1: Registration + shape comparison -->
+<div class="op" id="combo-reg">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">Registration + Shape Comparison</span>
+    <p class="op-brief">GA rotor aligns, metric Hausdorff measures residual shape difference.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Combined: GA alignment → metric shape comparison</span>
+
+CellShapes: 1..N             Metric
+──────────────               ──────────────
+Vertices:k ── &amp;             Calibrated Euclidean
+──────────────               ──────────────
+v ∈ ⋀¹G³                    0.065 μm/px
+──────────────               ──────────────
+
+; ρ: LandmarkExtract         <span class="cmt">← pick k corresponding points</span>
+
+; φ: ProcrustesRotor          <span class="cmt">← GA: find optimal R ∈ Spin(3)</span>
+                              <span class="cmt">   R = argmin Σ|Rv_iR̃ − w_i|²</span>
+                              <span class="cmt">   &amp; unchanged (isometry)</span>
+
+; μ: Hausdorff                <span class="cmt">← Metric: residual shape difference</span>
+                              <span class="cmt">   d_H = max(max_a min_b d(a,b), max_b min_a d(b,a))</span>
+                              <span class="cmt">   &amp; consumed → scalar in μm</span>
+
+; τ: ClassifyByDistance       <span class="cmt">← Metric: group by d_H &lt; threshold</span>
+
+Records: 1..K
+──────────────
+Columns: ShapeClass, d_Hausdorff
+──────────────
+ℕ × ℝ (μm)
+──────────────
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Organoid shape classification.</strong> 50 intestinal organoids imaged at 20×. Each organoid's contour is extracted as vertices v ∈ ⋀¹G³. The Procrustes rotor R aligns each pair (GA: removes rotation and translation). The Hausdorff distance d<sub>H</sub> then measures residual shape difference in μm (metric: how different the shapes actually are after optimal alignment). Organoids cluster into cystic (d<sub>H</sub> < 15 μm to a sphere), budding (15–40 μm), and branching (> 40 μm) classes. GA does the alignment; metric geometry does the classification.
+  </div>
+</div>
+
+<!-- Combined 2: Deformation analysis -->
+<div class="op" id="combo-deform">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">Tissue Deformation + Strain Statistics</span>
+    <p class="op-brief">GA motors capture per-edge deformation; metric kNN gives spatial context.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Combined: deformation motors on metric kNN graph</span>
+
+Cells: 1..N                  Metric
+──────────────               ──────────────
+Columns: pos (t₁)  &amp;         Calibrated Euclidean
+──────────────               ──────────────
+v ∈ ⋀¹G³                    0.32 μm/px
+──────────────               ──────────────
+
+; τ: kNN-Graph (k=6)          <span class="cmt">← Metric: build graph from calibrated distances</span>
+
+Cells: 1..N                  Edges: 1..E
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: c₁, c₂, d
+──────────────               ──────────────
+v ∈ ⋀¹G³                    {1..N}² × ℝ≥0
+──────────────               ──────────────
+
+; φ: MatchTimepoints          <span class="cmt">← link cells t₁ → t₂</span>
+; μ: EdgeMotor                <span class="cmt">← GA: compute M ∈ G³˙¹ per edge</span>
+
+Edges: 1..E
+──────────────
+Columns: c₁, c₂, M
+──────────────
+{1..N}² × G³˙¹
+──────────────
+
+; μ: DecomposeMotor           <span class="cmt">← GA: M → stretch, shear, rotation</span>
+; μ: SpatialAutocorrelation   <span class="cmt">← Metric: Moran's I on strain field</span>
+
+Records: 1..N
+──────────────
+Columns: LocalStretch, LocalShear, MoranI
+──────────────
+ℝ
+──────────────
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Wound-healing mechanics in a confluent monolayer.</strong> MDCK cells tracked over 6 hours. Metric geometry builds the kNN graph (who are neighbours?). GA motors capture per-edge deformation (how did they move relative to each other?). Moran's I spatial autocorrelation (metric: are nearby cells straining together?) reveals coordinated mechanical domains ~200 μm across — the hallmark of collective cell migration. Neither framework alone gives the full picture: metric geometry structures the graph, GA decomposes the motion, metric geometry again tests for spatial coherence.
+  </div>
+</div>
+
+<!-- Combined 3: CGA fitting + spatial statistics -->
+<div class="op" id="combo-cga">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">CGA Fitting + Spatial Statistics</span>
+    <p class="op-brief">CGA fits geometric primitives; metric Ripley's K tests for spatial pattern.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Combined: CGA sphere fit → metric spatial statistics</span>
+
+Localisations: 1..N          Metric
+──────────────               ──────────────
+Columns: x, y, z  &amp;         Calibrated Euclidean
+──────────────               ──────────────
+ℝ³                           2.5 nm/loc (PALM precision)
+──────────────               ──────────────
+
+; ρ: EmbedCGA                 <span class="cmt">← GA: lift to conformal space</span>
+; σ: DBSCAN (ε=30nm)          <span class="cmt">← Metric: density clustering</span>
+
+Clusters: 1..K               Metric (preserved)
+──────────────               ──────────────
+Localisations(k):1..Nk &amp;    Calibrated Euclidean
+──────────────               ──────────────
+S ∈ ⋀¹G⁴˙¹                  2.5 nm/loc
+──────────────               ──────────────
+
+; μ: CGA_CircleFit            <span class="cmt">← GA: fit circle to each cluster (linear in CGA)</span>
+
+Records: 1..K
+──────────────
+Columns: Centre_x, Centre_y, Radius
+──────────────
+ℝ² × ℝ (nm)
+──────────────
+
+; μ: RipleysK (&amp; Euclidean)   <span class="cmt">← Metric: test spatial pattern of cluster centres</span>
+; μ: NearestNeighbourDist     <span class="cmt">← Metric: inter-cluster distances</span>
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Nuclear pore complex organisation — PALM super-resolution.</strong> Nup107 localisations at 2.5 nm precision. DBSCAN clusters them by metric density (ε = 30 nm, minPts = 8). Within each cluster, CGA circle fitting (a linear operation in G⁴˙¹) gives the ring radius (~52 nm for NPCs). Then metric Ripley's K on the cluster centres tests whether NPCs are randomly distributed on the nuclear envelope or show spatial patterning. GA gives precise geometric fitting; metric geometry gives spatial statistics.
+  </div>
+</div>
+
+<!-- Combined 4: Mesh curvature + Wasserstein -->
+<div class="op" id="combo-shape">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">Mesh Curvature + Distribution Comparison</span>
+    <p class="op-brief">GA bivectors compute curvature; metric Wasserstein compares curvature distributions.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Combined: GA curvature → metric distribution comparison</span>
+
+Cells: WT, KD (2 conditions)
+──────────────
+Objects: 1..N per condition
+──────────────
+Vertices: 1..V               Faces: 1..F
+──────────────               ──────────────
+v ∈ ⋀¹G³          &amp;          B ∈ ⋀²G³
+──────────────               ──────────────
+
+; μ: Curvature                <span class="cmt">← GA: from bivector angular deficit</span>
+
+Cells: WT, KD
+──────────────
+Objects: 1..N
+──────────────
+Vertices: 1..V
+──────────────
+MeanCurv ∈ ℝ
+──────────────
+
+; τ: CurvatureHistogram       <span class="cmt">← per-cell curvature distribution</span>
+
+Cells: WT, KD
+──────────────
+Objects: 1..N
+──────────────
+Bins: 1..B
+──────────────
+ℝ (probability)
+──────────────
+
+; μ: Wasserstein              <span class="cmt">← Metric: compare curvature distributions</span>
+                              <span class="cmt">   W₁(P_WT, P_KD) = optimal transport cost</span>
+
+Records: 1
+──────────────
+Columns: W₁_distance, p_value
+──────────────
+ℝ
+──────────────
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Cell shape phenotyping — WT vs KD of a cytoskeletal regulator.</strong> Wild-type and knockdown HeLa cells imaged in 3D. GA bivector normals on the surface mesh give per-vertex mean curvature (no matrix eigendecomposition). Each cell's curvature distribution is binned into a histogram. The Wasserstein distance W₁ (metric geometry, on the space of distributions) quantifies how much the curvature profile shifted: W₁ = 0.018 μm⁻¹ between WT and KD, p < 0.001 by permutation test. GA computes the shape feature; metric geometry tests whether the populations differ.
+  </div>
+</div>
+
+<!-- Combined 5: Neuron morphometry -->
+<div class="op" id="combo-neuron">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">Full Neuron Morphometry</span>
+    <p class="op-brief">GA types on the skeleton graph; metric Sholl and GromovDelta measure branching.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Combined: GA-typed neuron skeleton → metric morphometry</span>
+
+Confocal z-stack
+──────────────
+ξz,y,x: 64, 1024, 1024               Calibration: 1
+≡≡≡≡≡≡≡≡≡≡≡≡≡≡                         ──────────────
+ℝ: [0..2¹⁶]                   &amp;      xy: 0.32 μm/px, z: 1.2 μm/px
+──────────────                         ──────────────
+
+; σ: Threshold/Trace ; ρ: Skeletonize
+
+Junctions: 1..J              Branches: 1..B
+──────────────               ──────────────
+Columns: pos      &amp;          Columns: j₁, j₂, length
+──────────────               ──────────────
+v ∈ ⋀¹G³                    {1..J}² × ℝ≥0 (calibrated μm)
+──────────────               ──────────────
+
+<span class="cmt">GA types on vertices: direction = tangent vector at junction.</span>
+<span class="cmt">Metric &amp; has changed form: voxel grid → graph shortest-path.</span>
+
+; μ: Sholl                    <span class="cmt">← Metric: intersections at radii r₁..rₘ</span>
+; μ: GromovDelta              <span class="cmt">← Metric: tree-likeness of the skeleton</span>
+; μ: BranchAngle              <span class="cmt">← GA: angles from tangent vector inner products</span>
+
+Records: 1
+──────────────
+Columns: ShollMax, CriticalRadius,
+         GromovDelta, MeanBranchAngle
+──────────────
+ℝ (count, μm, μm, radians)
+──────────────
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>Hippocampal neuron morphometry — dendritic arbor classification.</strong> A biocytin-filled neuron imaged by confocal. After skeletonisation, junctions carry position vectors v ∈ ⋀¹G³ (GA: tangent directions at branch points). Metric Sholl analysis counts branch crossings at concentric spheres — critical radius = 120 μm. Metric GromovDelta tests tree-likeness: δ ≈ 0 confirms near-perfect tree structure (no anastomoses). GA branch angles from tangent vector inner products v₁·v₂ = cos θ distinguish narrow-angle (apical) from wide-angle (basal) branching — a feature invisible to path-length-only analysis.
+  </div>
+</div>
+
+<!-- Combined 6: Multiplex imaging -->
+<div class="op" id="combo-multiplex">
+  <div class="op-head">
+    <span class="badge badge-combo">GA+Met</span>
+    <span class="op-title">Multiplex Imaging — Two Metric Spaces</span>
+    <p class="op-brief">Physical &amp; (Euclidean) + marker &amp; (expression metric) — linked at the cell index.</p>
+  </div>
+<pre class="stave">
+<span class="cmt">Multiplex: two metric spaces, one cell index</span>
+
+Cells: 1..N                  Spatial &amp;                Marker &amp;
+──────────────               ──────────────           ──────────────
+Columns: x, y     &amp;         Calibrated Euclidean &amp;   Cosine similarity
+──────────────               ──────────────           ──────────────
+ℝ²                           0.5 μm/px                on expression ∈ ℝ⁴⁰
+──────────────               ──────────────           ──────────────
+
+<span class="cmt">Two independent metric structures on the SAME cell index.</span>
+<span class="cmt">Physical space: where cells are.  Marker space: what cells express.</span>
+
+; τ: kNN-Graph (&amp; spatial)    <span class="cmt">← Metric on physical &amp;: spatial neighbours</span>
+; τ: Phenotype (&amp; marker)     <span class="cmt">← Metric on marker &amp;: cell type clusters</span>
+
+Cells: 1..N                  SpatialEdges: 1..E₁      ExprEdges: 1..E₂
+──────────────               ──────────────           ──────────────
+Cols: CellType    &amp;          Cols: c₁,c₂    &amp;        Cols: c₁,c₂
+──────────────               ──────────────           ──────────────
+Cat(K)                       {1..N}² × dist           {1..N}² × sim
+──────────────               ──────────────           ──────────────
+
+; μ: CrossModularity           <span class="cmt">← Metric on BOTH: spatial vs phenotypic correlation</span>
+; μ: Wasserstein               <span class="cmt">← Metric on marker &amp;: compare tissue regions</span>
+</pre>
+  <div class="ex ex-combo">
+    <div class="ex-label">Microscopy example</div>
+    <strong>CODEX 40-marker tissue analysis — cellular neighbourhoods.</strong> Each cell has two &amp; partners: spatial position (Euclidean metric, 0.5 μm/px) and a 40-dimensional expression vector (cosine similarity metric). The kNN graph on spatial &amp; identifies physical neighbours; clustering on marker &amp; identifies phenotypes. Cross-modularity μ tests whether phenotypically similar cells co-locate in space — the signature of tissue microenvironments. Wasserstein distance on marker &amp; between tumour core and invasive margin quantifies the phenotypic shift across the tumour boundary. GA enters when registration is needed (aligning serial sections by rotor), but the core analysis is metric geometry on two linked metric spaces.
+  </div>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="classify">
+<h2>7. Classification — What Each Framework Contributes</h2>
+
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr>
+    <th>Aspect</th>
+    <th><span class="badge badge-ga">GA</span> Geometric Algebra</th>
+    <th><span class="badge badge-met">Met</span> Metric Geometry</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><strong>Core object</strong></td>
+    <td>Multivector in Clₚ,ᵧ,ᵣ</td>
+    <td>Metric space (X, d)</td>
+  </tr>
+  <tr>
+    <td><strong>What it answers</strong></td>
+    <td>How to <em>transform</em></td>
+    <td>How to <em>measure</em></td>
+  </tr>
+  <tr>
+    <td><strong>Key operation</strong></td>
+    <td>Geometric product ab</td>
+    <td>Distance function d(x,y)</td>
+  </tr>
+  <tr>
+    <td><strong>Stave morphisms</strong></td>
+    <td>Primarily φ, ρ</td>
+    <td>All types: μ, σ, φ, ρ, τ</td>
+  </tr>
+  <tr>
+    <td><strong>Effect on &amp;</strong></td>
+    <td>Preserve (isometry) or change form</td>
+    <td>Read, partition, rearrange, or change form</td>
+  </tr>
+  <tr>
+    <td><strong>Strengths</strong></td>
+    <td>Composition of transforms; oriented quantities; dimension-free algebra</td>
+    <td>Comparing shapes; non-Euclidean spaces; spatial statistics</td>
+  </tr>
+  <tr>
+    <td><strong>Limitations</strong></td>
+    <td>Requires vector space structure</td>
+    <td>No algebraic composition of transforms</td>
+  </tr>
+  <tr>
+    <td><strong>Where metric enters</strong></td>
+    <td>Quadratic form Q(v) = v² defines the algebra</td>
+    <td>Distance function d(x,y) defines the space</td>
+  </tr>
+  <tr>
+    <td><strong>When to use</strong></td>
+    <td>Direction matters; transforms compose; oriented surfaces/volumes</td>
+    <td>Distances matter; non-Euclidean spaces; spatial pattern testing</td>
+  </tr>
+  <tr>
+    <td><strong>Typical microscopy use</strong></td>
+    <td>Registration, flow fields, meshes, polarisation, deformation</td>
+    <td>Spatial statistics, clustering, shape comparison, graph analysis</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+<div class="op">
+  <h3>Morphism–framework classification</h3>
+<pre class="stave">
+<span class="cmt">Which morphisms are primarily GA, primarily metric, or combined?</span>
+
+                GA only        Metric only      Combined
+                ─────────      ───────────      ──────────
+φ              Rotor           MetricProjection  Isometry
+               Motor           DistanceTransform LipschitzMap
+               Versor                            QuasiIsometry
+               Waveplate
+
+ρ              EmbedCGA        MetricGraph
+               MarchingCubes   GeodesicDistField
+                               EmbedInAmbient
+                               MetricCompletion
+
+μ              NematicOrder    Distance          Curvature (GA types, metric defn)
+               MotionFeatures  Hausdorff         BranchAngle (GA types, metric &amp;)
+               StokesParams    Wasserstein
+                               Sholl
+                               GromovDelta
+
+σ                              Voronoi
+                               DBSCAN
+                               MetricBall
+
+τ                              kNN-Graph
+                               ε-Net
+                               MetricFilter
+</pre>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<section id="category">
+<h2>8. Category-Theoretic Bridge</h2>
+
+<p>For the formally inclined: the two frameworks meet in the theory of <strong>enriched categories</strong>.</p>
+
+<div class="op">
+<h3>Lawvere enrichment and Clifford homomorphisms</h3>
+<pre class="stave">
+<span class="cmt">Metric geometry as enriched category (Lawvere, 1973)</span>
+
+A metric space (X, d) is a category enriched over ([0,∞], ≥, +):
+  - Objects: points of X
+  - Hom(x,y) = d(x,y) ∈ [0,∞]
+  - Composition: d(x,z) ≤ d(x,y) + d(y,z)   (triangle inequality)
+  - Identity: d(x,x) = 0
+
+Enriched functor F: (X,d_X) → (Y,d_Y):
+  d_Y(Fx, Fy) ≤ d_X(x,y)    non-expansive (Lipschitz L ≤ 1)
+
+<span class="cmt">Geometric algebra as structured algebra</span>
+
+A Clifford algebra Cl(V,Q) with quadratic form Q:
+  - Q(v) = v²  defines the metric on V
+  - Clifford homomorphism f: Cl(V,Q) → Cl(W,Q')
+    preserving Q is an isometry of the underlying metric spaces
+
+<span class="cmt">The bridge</span>
+
+  GA rotor R with RR̃ = 1
+  ⟺ isometry of (V, Q)
+  ⟺ enriched functor with d_Y = d_X (equality, not just ≤)
+
+  GA versor with |VṼ| = k²
+  ⟺ Lipschitz map with L = k
+  ⟺ enriched functor with d_Y ≤ k · d_X
+
+<span class="cmt">In Stave: both are φ-morphisms with specific &amp; behaviour.</span>
+<span class="cmt">The category theory makes the &amp; classification theorem a fact:</span>
+<span class="cmt">  Isometry → &amp; unchanged</span>
+<span class="cmt">  Lipschitz → &amp; scaled ≤ L</span>
+<span class="cmt">  Metric-consuming → &amp; read then dropped</span>
+</pre>
+</div>
+
+<p>The <code>&amp;</code> classification table from the metric geometry reference is not just a convention — it's a <strong>theorem</strong> in enriched category theory. An isometry (GA rotor) preserves the enrichment exactly. A Lipschitz map (GA dilator) scales the enrichment by at most L. A measurement (μ) is a functor from the enriched category to ℝ that reads the hom-values — it consumes the enrichment. The notation makes this visible: the &amp; column in a stave tells you what kind of enriched functor the morphism is.</p>
+
+<div class="summary">
+  <h3>Summary</h3>
+  <p><strong>GA and metric geometry are not competing frameworks.</strong> GA provides the <em>algebra of transformations</em> — rotors compose, motors interpolate, bivectors compute curvature. Metric geometry provides the <em>calculus of distances</em> — Hausdorff compares shapes, Wasserstein compares distributions, kNN builds graphs, Sholl counts branches.</p>
+  <p>In Stave Notation, both enter through <code>&amp;</code> — the container that carries metric structure alongside data. GA operations are primarily <code>φ</code> and <code>ρ</code>; metric geometry spans all morphism types. The bridge is the quadratic form: Q(v) = v² defines both the Clifford algebra and the distance function. A rotor that preserves Q is an isometry that preserves d.</p>
+  <p>For the biologist, the notation hides the formalism: <code>φ: Rotor</code> and <code>μ: Hausdorff</code> compose with <code>;</code> through the same <code>&amp;</code> container, and the classification table says what happens to metric structure at each step. The two frameworks complement each other the way a screwdriver and a ruler complement each other — one does the work, the other measures the result.</p>
+</div>
+</section>
